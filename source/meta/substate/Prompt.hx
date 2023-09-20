@@ -2,7 +2,8 @@ package meta.substate;
 
 import meta.*;
 import flixel.FlxSubState;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import openfl.geom.Rectangle;

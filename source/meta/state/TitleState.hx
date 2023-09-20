@@ -22,13 +22,32 @@ import flixel.sound.FlxSound;
 #else
 import flixel.system.FlxSound;
 #end
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import lime.app.Application;
 import openfl.Assets;
+import flixel.FlxBasic;
+import flixel.FlxObject;
+import openfl.Lib;
+import openfl.display.BlendMode;
+import openfl.filters.BitmapFilter;
+import flixel.util.FlxSave;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.system.FlxAssets.FlxShader;
+import meta.MusicBeatState.ModchartSprite;
+import meta.MusicBeatState.ModchartText;
+
+#if hscript
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Expr;
+import meta.state.PlayState.FunkinUtil;
+import meta.data.scripts.FunkinLua.HScript;
+#end
 
 import meta.*;
 import meta.data.*;
@@ -53,6 +72,10 @@ typedef TitleData =
 
 class TitleState extends MusicBeatState
 {
+	#if hscript
+	public static var hscript:HScript = null;
+	#end
+	
 	public static var titleJSON:TitleData;
 	public static var initialized:Bool = false;
 
