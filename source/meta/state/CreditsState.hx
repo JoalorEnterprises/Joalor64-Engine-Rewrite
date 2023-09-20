@@ -3,13 +3,12 @@ package meta.state;
 #if desktop
 import meta.data.dependency.Discord.DiscordClient;
 #end
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
@@ -17,7 +16,6 @@ import flixel.tweens.FlxEase;
 import sys.FileSystem;
 import sys.io.File;
 #end
-import lime.utils.Assets;
 
 import meta.*;
 import meta.data.*;

@@ -14,7 +14,8 @@ import flixel.addons.effects.FlxTrail;
 import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 #if (flixel >= "5.3.0")
@@ -56,6 +57,9 @@ import meta.video.*;
 import objects.userinterface.*;
 import objects.userinterface.note.*;
 import objects.*;
+
+import meta.MusicBeatState.ModchartSprite;
+import meta.MusicBeatState.ModchartText;
 
 import objects.userinterface.DialogueBoxPsych;
 
@@ -3323,32 +3327,6 @@ class FunkinLua {
 	public static inline function getInstance()
 	{
 		return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
-	}
-}
-
-class ModchartSprite extends FlxSprite
-{
-	public var wasAdded:Bool = false;
-	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
-	//public var isInFront:Bool = false;
-
-	public function new(?x:Float = 0, ?y:Float = 0)
-	{
-		super(x, y);
-		antialiasing = ClientPrefs.globalAntialiasing;
-	}
-}
-
-class ModchartText extends FlxText
-{
-	public var wasAdded:Bool = false;
-	public function new(x:Float, y:Float, text:String, width:Float)
-	{
-		super(x, y, width, text, 16);
-		setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		cameras = [PlayState.instance.camHUD];
-		scrollFactor.set();
-		borderSize = 2;
 	}
 }
 

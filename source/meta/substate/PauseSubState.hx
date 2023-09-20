@@ -16,7 +16,8 @@ import flixel.sound.FlxSound;
 #else
 import flixel.system.FlxSound;
 #end
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;

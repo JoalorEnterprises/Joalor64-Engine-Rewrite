@@ -7,7 +7,8 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxColor;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 
 #if (MODS_ALLOWED && FUTURE_POLYMOD)
 import sys.io.File;

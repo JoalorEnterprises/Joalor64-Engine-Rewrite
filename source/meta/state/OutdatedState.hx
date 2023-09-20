@@ -2,7 +2,8 @@ package meta.state;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.util.FlxColor;
 import lime.app.Application;
 import flixel.addons.transition.FlxTransitionableState;

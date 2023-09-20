@@ -3,29 +3,23 @@ package meta.state;
 #if desktop
 import meta.data.dependency.Discord.DiscordClient;
 #end
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.ui.FlxButtonPlus;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
-import flixel.text.FlxText;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
-import lime.utils.Assets;
 import flixel.system.FlxSound;
-import openfl.utils.Assets as OpenFlAssets;
 import sys.io.File;
 import sys.FileSystem;
 import haxe.Json;
 import haxe.format.JsonParser;
 import openfl.display.BitmapData;
-import flash.geom.Rectangle;
 import flixel.ui.FlxButton;
 import flixel.FlxBasic;
-import sys.io.File;
 import flixel.input.keyboard.FlxKey;
 
 import meta.*;

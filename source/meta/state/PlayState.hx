@@ -12,6 +12,7 @@ import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
 #end
 
+import flixel.addons.ui.FlxUIState;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxObject;
@@ -23,6 +24,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
+import flixel.math.FlxRandom;
 import flixel.math.FlxRect;
 #if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;
@@ -45,6 +47,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 import flixel.util.FlxSave;
+import flixel.util.FlxAxes;
 import flixel.animation.FlxAnimationController;
 import animateatlas.AtlasFrameMaker;
 import modcharting.ModchartFuncs;
@@ -100,11 +103,16 @@ import meta.state.ReplayState.ReplayPauseSubstate;
 import meta.data.scripts.FunkinLua;
 import meta.data.Achievements;
 import meta.data.Conductor;
+import meta.data.ModchartTween;
 import meta.data.Song;
 import meta.data.Section;
 import meta.data.StageData;
 import meta.data.WeekData;
+import meta.MusicBeatState.ModchartSprite;
+import meta.MusicBeatState.ModchartText;
 import objects.Character;
+
+import Type.ValueType;
 
 using meta.CoolUtil;
 using StringTools;
@@ -113,6 +121,9 @@ class PlayState extends MusicBeatState
 {
 	public static var STRUM_X = 48.5;
 	public static var STRUM_X_MIDDLESCROLL = -278;
+
+	public static var gameParameters:Map<String,Dynamic> = new Map<String,Dynamic>();
+	public static var funk:FunkinUtil;
 
 	public static var ratingStuff:Array<Dynamic> = [
 		['F-', 0.2],
@@ -173,13 +184,6 @@ class PlayState extends MusicBeatState
 	public var boyfriendMap:Map<String, Boyfriend> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
-	public var variables:Map<String, Dynamic> = new Map();
-	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
-	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
-	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
-	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
-	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
-	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
@@ -283,7 +287,7 @@ class PlayState extends MusicBeatState
 	public var iconP2:HealthIcon;
 	
 	public var camHUD:FlxCamera;
-	public var camGame:FlxCamera;
+	// public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 	public var cameraSpeed:Float = 1;
 
@@ -413,6 +417,25 @@ class PlayState extends MusicBeatState
 
 	public static var inMini:Bool = false;
 
+	public function setArrowSkinFromName(songName:String):Void
+	{
+		var noPlayerSkin = SONG.arrowSkin == null || SONG.arrowSkin.length < 1;
+		var noOpponentSkin = SONG.opponentArrowSkin == null || SONG.opponentArrowSkin.length < 1;
+
+		if(noPlayerSkin || noOpponentSkin){
+			//W: I'll do this later but I'm adding this function for completion
+			/*songName = songName.toLowerCase();
+			switch (songName)
+			{
+				default: 
+					if(noPlayerSkin) PlayState.SONG.arrowSkin = 'note_assets';
+					if(noOpponentSkin) PlayState.SONG.opponentArrowSkin = "note_assets";
+			}
+			*/	
+			//W: TO-DO, Add some hscript callback here lol.
+		}
+	}
+
 	override public function create()
 	{
 		if (curStage != 'schoolEvil')
@@ -427,6 +450,8 @@ class PlayState extends MusicBeatState
 
 		// for lua
 		instance = this;
+
+		funk = new FunkinUtil(instance, true);
 
 		if (!inReplay)
 		{
@@ -586,6 +611,9 @@ class PlayState extends MusicBeatState
 
 		GameOverSubstate.resetVariables();
 		var songName:String = Paths.formatToSongPath(SONG.song);
+		songName = songName.toLowerCase();
+
+		setArrowSkinFromName(songName);
 
 		curStage = SONG.stage;
 		if(SONG.stage == null || SONG.stage.length < 1) {
@@ -1008,6 +1036,8 @@ class PlayState extends MusicBeatState
 				add(halloweenWhite);
 			case 'tank':
 				add(foregroundSprites);
+			default:
+				callStageFunctions("foregroundAdd", []);
 		}
 
 		#if LUA_ALLOWED
@@ -1715,7 +1745,6 @@ class PlayState extends MusicBeatState
 	}
 
 	#if (!flash && sys)
-	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
 	public function createRuntimeShader(name:String):FlxRuntimeShader
 	{
 		if(!ClientPrefs.shaders) return new FlxRuntimeShader();
@@ -2205,13 +2234,6 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
-		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
-		if(variables.exists(tag)) return variables.get(tag);
-		return null;
-	}
-
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false) {
 		if(gfCheck && char.curCharacter.startsWith('gf')) { //IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
 			char.setPosition(GF_X, GF_Y);
@@ -2222,7 +2244,7 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String)
+	override public function startVideo(name:String)
 	{
 		#if (VIDEOS_ALLOWED || WEBM_ALLOWED)
 		inCutscene = true;
@@ -4656,10 +4678,7 @@ class PlayState extends MusicBeatState
 
 		if (gf != null && SONG.notes[curSection].gfSection)
 		{
-			camFollow.set(gf.getMidpoint().x, gf.getMidpoint().y);
-			camFollow.x += gf.cameraPosition[0] + girlfriendCameraOffset[0];
-			camFollow.y += gf.cameraPosition[1] + girlfriendCameraOffset[1];
-			tweenCamIn();
+			moveCamera(true, 1);
 			callOnLuas('onMoveCamera', ['gf']);
 			return;
 		}
@@ -4669,9 +4688,16 @@ class PlayState extends MusicBeatState
 	}
 
 	var cameraTwn:FlxTween;
-	public function moveCamera(isDad:Bool)
+	public function moveCamera(isDad:Bool, ?isGF:Int = 0)
 	{
-		if(isDad)
+		//W: TODO, add the ability to disable camera movements per character
+		if(isGF > 0){
+			camFollow.set(gf.getMidpoint().x, gf.getMidpoint().y);
+			camFollow.x += gf.cameraPosition[0] + girlfriendCameraOffset[0];
+			camFollow.y += gf.cameraPosition[1] + girlfriendCameraOffset[1];
+			tweenCamIn();
+		}
+		else if(isDad)
 		{
 			camFollow.set(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
 			camFollow.x += dad.cameraPosition[0] + opponentCameraOffset[0];
@@ -6114,7 +6140,7 @@ class PlayState extends MusicBeatState
 		return for (i in scriptArray) i.set(key, value);
 	}
 
-	public function callOnLuas(event:String, args:Array<Dynamic>, ?callOnScript:Bool = true, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
+	override public function callOnLuas(event:String, args:Array<Dynamic>, ?callOnScript:Bool, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
 		if (callOnScript)
 			callOnScripts(event, args);
 
@@ -6150,9 +6176,12 @@ class PlayState extends MusicBeatState
 			if (ret != FunkinLua.Function_Continue)
 				returnVal = ret;
 		}
+		#end
+
 		for (i in achievementsArray)
 		i.call(event, args);
-		#end
+
+		callStageFunctions(event, args);
 			
 		return returnVal;
 	}

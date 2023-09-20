@@ -3,6 +3,7 @@ package meta;
 import meta.data.Conductor.BPMChangeEvent;
 import meta.data.CustomFadeTransition;
 import meta.data.ClientPrefs;
+import meta.data.*;
 import flixel.FlxG;
 import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
@@ -16,9 +17,35 @@ import flixel.util.FlxGradient;
 import flixel.FlxState;
 import flixel.FlxCamera;
 import flixel.FlxBasic;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
+import flixel.system.FlxSound;
+#end
+import flixel.FlxObject;
+import flixel.text.FlxTextNew as FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+import openfl.Lib;
+import openfl.display.BlendMode;
+import openfl.filters.BitmapFilter;
+import openfl.utils.Assets;
+import flixel.math.FlxMath;
+import flixel.util.FlxSave;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.system.FlxAssets.FlxShader;
+
+#if VIDEOS_ALLOWED
+#if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as MP4Handler;
+#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as MP4Handler;
+#elseif (hxCodec == "2.6.0") import VideoHandler as MP4Handler;
+#else import vlc.MP4Handler; #end
+import sys.io.File;
+#end
 
 class MusicBeatState extends modcharting.ModchartMusicBeatState
 {
+	public var camGame:FlxCamera;
+
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
@@ -28,6 +55,16 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
+
+	public var variables:Map<String, Dynamic> = new Map();
+	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
+	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
+	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
+	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
+	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
+	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
+	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
+	public static var gameStages:Map<String,FunkyFunct> = new Map<String,FunkyFunct>();
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
@@ -74,6 +111,80 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
 
 		super.update(elapsed);
+	}
+
+	public function onVideoEnd(filepath:String, success:Bool)
+	{
+		callStageFunctions("onVideoEnd",[filepath, success]);
+	}
+
+	public function startVideo(name:String)
+	{
+		#if (VIDEOS_ALLOWED || WEBM_ALLOWED)
+		inCutscene = true;
+
+		var filepath:String = Paths.video(name);
+		#if sys
+		if(!FileSystem.exists(filepath))
+		#else
+		if(!OpenFlAssets.exists(filepath))
+		#end
+		{
+			FlxG.log.warn('Couldnt find video file: ' + name);
+			onVideoEnd(filepath, false);
+			return;
+		}
+		var video:MP4Handler = new MP4Handler();
+		#if (hxCodec >= "3.0.0")
+		// Recent versions
+		video.play(filepath);
+		video.onEndReached.add(function()
+		{
+			video.dispose();
+			onVideoEnd(filepath, false);
+			return;
+		}, true);
+		#else
+		// Older versions
+		video.playVideo(filepath);
+		video.finishCallback = function()
+		{
+			onVideoEnd(filepath, false);
+			return;
+		}
+		#end
+		#else
+		FlxG.log.warn('Platform not supported!');
+		onVideoEnd(filepath, false);
+		return;
+		#end
+	}
+
+	public function getControl(key:String) {
+		var pressed:Bool = Reflect.getProperty(controls, key);
+		//trace('Control result: ' + pressed);
+		return pressed;
+	}
+
+	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
+		callStageFunctions(event,args);
+		return 0;
+	}
+
+	public function callStageFunctions(event:String,args:Array<Dynamic>){
+		try{
+			var ret = gameStages.get(event);
+			if(ret != null){
+				//trace(event);
+				Reflect.callMethod(null, ret.func, args);
+				/*
+				gameParameters.set("args", args);
+				ret.func();*/
+			}
+		}
+		catch(err){
+			trace("\n["+event+"] Stage Function Error: " + err);
+		}
 	}
 
 	private function updateSection():Void
@@ -176,5 +287,38 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 		var val:Null<Float> = 4;
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
+	}
+
+	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
+		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
+		if(variables.exists(tag)) return variables.get(tag);
+		return null;
+	}
+}
+
+class ModchartSprite extends FlxSprite
+{
+	public var wasAdded:Bool = false;
+	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
+	//public var isInFront:Bool = false;
+
+	public function new(?x:Float = 0, ?y:Float = 0)
+	{
+		super(x, y);
+		antialiasing = ClientPrefs.globalAntialiasing;
+	}
+}
+
+class ModchartText extends FlxText
+{
+	public var wasAdded:Bool = false;
+	public function new(x:Float, y:Float, text:String, width:Float)
+	{
+		super(x, y, width, text, 16);
+		setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		cameras = [PlayState.instance.camHUD];
+		scrollFactor.set();
+		borderSize = 2;
 	}
 }

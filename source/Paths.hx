@@ -484,17 +484,26 @@ class Paths
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
+		var path:String;
 		#if sys
 		#if (MODS_ALLOWED && FUTURE_POLYMOD)
-		if (!ignoreMods && FileSystem.exists(modFolders(key)))
-			return File.getContent(modFolders(key));
+		path = modFolders(key);
+		if (!ignoreMods && FileSystem.exists(path)){
+			trace(path);
+			return File.getContent(path);
+		}
 		#end
 
-		if (FileSystem.exists(getPreloadPath(key)))
-			return File.getContent(getPreloadPath(key));
+		path = getPreloadPath(key);
+		if (FileSystem.exists(path)){
+			trace(path);
+			return File.getContent(path);
+		}
 		#end
 
-		return Assets.getText(getPath(key, TEXT));
+		path = getPath(key, TEXT);
+		trace(path);	
+		return Assets.getText(path);
 	}
 
 	inline static public function font(key:String)
