@@ -1,7 +1,5 @@
 package meta;
 
-import flixel.addons.ui.FlxUIState;
-
 class MusicBeatState extends modcharting.ModchartMusicBeatState
 {
 	private var curSection:Int = 0;

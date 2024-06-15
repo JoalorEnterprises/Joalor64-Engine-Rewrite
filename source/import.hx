@@ -49,7 +49,6 @@ import js.html.*;
 
 // Joalor64 Engine Imports
 import animateatlas.AtlasFrameMaker;
-
 #if desktop
 import meta.data.dependency.Discord;
 #end
@@ -79,6 +78,7 @@ import objects.userinterface.*;
 #if MODS_ALLOWED 
 import backend.Mods; 
 #end
+import backend.ui.*;
 import backend.Paths;
 import backend.Localization;
 import backend.animation.PsychAnimationController;
