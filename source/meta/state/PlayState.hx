@@ -252,14 +252,8 @@ class PlayState extends MusicBeatState
 	var gunsTween:FlxTween = null;
 	var stageGraphicArray:Array<FlxSprite> = [];
 	var gunsNoteTweens:Array<FlxTween> = [];
-	// the funny thing is, i am considering adding extra notes in the future
-	// we're gonna cook next update
-	public static var mania(default, set):Int = 3;
-	public static function set_mania(newMania:Int) {
-		mania = newMania;
-		if (PlayState.instance == null) return mania;
-		return mania;
-	}
+
+	public static var mania:Int = 3;
 
 	public var smoothScore:Float = 0;
 	public var songScore:Int = 0;
@@ -411,7 +405,9 @@ class PlayState extends MusicBeatState
 			'NOTE_RIGHT'
 		];
 
-		keysArray = [];
+		if (SONG.mania == null || SONG.mania < EK.minMania || SONG.mania > EK.maxMania) SONG.mania = EK.defaultMania;
+		mania = SONG.mania;
+		keysArray = EK.fillKeys()[mania];
 
 		// real question, how do switch statements make everything so easy??
 		ratingStuff = switch (ClientPrefs.scoreTxtType) {

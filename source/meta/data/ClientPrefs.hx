@@ -14,7 +14,17 @@ class ClientPrefs {
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
 	public static var noteOffset:Int = 0;
-	public static var arrowRGB:Array<Array<Int>> = [[194, 75, 153], [0, 255, 255], [18, 250, 5], [249, 57, 63]];
+	public static var arrowRGB:Array<Array<Int>> = [
+		[194, 75, 153], 
+		[0, 255, 255], 
+		[18, 250, 5], 
+		[249, 57, 63].
+		[153, 153, 153],
+		[255, 255, 0],
+		[139, 74, 255],
+		[255, 0, 0],
+		[0, 51, 255]
+	];
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreTxtType:String = 'Default';
@@ -78,10 +88,48 @@ class ClientPrefs {
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
 		//Key Bind, Name for ControlsSubState
+		'note_1' 		=> [SPACE],
+		'note_3a'		=> [SPACE],
+		'note_5a'		=> [SPACE],
+
 		'note_left'		=> [A, LEFT],
 		'note_down'		=> [S, DOWN],
 		'note_up'		=> [W, UP],
 		'note_right'	=> [D, RIGHT],
+
+		'note_6a'		=> [S],
+		'note_6b'		=> [D],
+		'note_6c'		=> [F],
+		'note_6d'		=> [J],
+		'note_6e'		=> [K],
+		'note_6f'		=> [L],
+		
+		'note_7a'		=> [S],
+		'note_7b'		=> [D],
+		'note_7c'		=> [F],
+		'note_7d'		=> [SPACE],
+		'note_7e'		=> [J],
+		'note_7f'		=> [K],
+		'note_7g'		=> [L],
+		
+		'note_8a'		=> [A],
+		'note_8b'		=> [S],
+		'note_8c'		=> [D],
+		'note_8d'		=> [F],
+		'note_8e'		=> [H],
+		'note_8f'		=> [J],
+		'note_8g'		=> [K],
+		'note_8h'		=> [L],
+		
+		'note_9a'		=> [A],
+		'note_9b'		=> [S],
+		'note_9c'		=> [D],
+		'note_9d'		=> [F],
+		'note_9e'		=> [SPACE],
+		'note_9f'		=> [H],
+		'note_9g'		=> [J],
+		'note_9h'		=> [K],
+		'note_9i'		=> [L],
 		
 		'ui_left'		=> [A, LEFT],
 		'ui_down'		=> [S, DOWN],

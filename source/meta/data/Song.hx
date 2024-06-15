@@ -16,6 +16,8 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 
+	@:optional var mania:Int;
+
 	var arrowSkin:String;
 	var splashSkin:String;
 }

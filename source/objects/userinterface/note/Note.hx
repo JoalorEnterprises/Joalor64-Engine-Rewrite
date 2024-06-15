@@ -1,6 +1,5 @@
 package objects.userinterface.note;
 
-import flixel.graphics.frames.FlxAtlasFrames;
 import objects.shaders.*;
 
 typedef EventNote = {
@@ -16,7 +15,7 @@ class Note extends FlxSprite
 	public var mesh:modcharting.SustainStrip = null;
 	public var z:Float = 0;
 
-	public var extraData:Map<String,Dynamic> = [];
+	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var strumTime:Float = 0;
 	public var mustPress:Bool = false;
@@ -318,15 +317,22 @@ class Note extends FlxSprite
 	}
 
 	function loadNoteAnims() {
-		animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
-
-		if (isSustainNote)
-		{
-			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
-			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
+		var playAnim:String = EK.colArray[EK.gfxIndex[PlayState.mania][noteData]];
+		var playAnimAlt:String = EK.colArrayAlt[EK.gfxIndex[PlayState.mania][noteData]];
+		if (isSustainNote) {
+			attemptToAddAnimationByPrefix('Aholdend', 'pruple end hold', 24, true);
+			attemptToAddAnimationByPrefix(playAnim + 'holdend', playAnim + ' tail0', 24, true);
+			attemptToAddAnimationByPrefix(playAnim + 'hold', playAnim + ' hold0', 24, true);
+			attemptToAddAnimationByPrefix(playAnim + 'holdend', playAnimAlt + ' hold end', 24, true);
+			attemptToAddAnimationByPrefix(playAnim + 'hold', playAnimAlt + ' hold piece', 24, true);
+			animation.addByPrefix(playAnim + 'holdend', playAnim + ' hold end', 24, true);
+			animation.addByPrefix(playAnim + 'hold', playAnim + ' hold piece', 24, true);
+		} else {
+			attemptToAddAnimationByPrefix(playAnim + 'Scroll', playAnimAlt + '0');
+			animation.addByPrefix(playAnim + 'Scroll', playAnim + '0');
 		}
-		setGraphicSize(Std.int(defaultWidth * 0.7), (isSustainNote ? Std.int(defaultHeight * 0.7) : 0));
+
+		setGraphicSize(Std.int(width * EK.scales[PlayState.mania]));
 		updateHitbox();
 	}
 
